@@ -1,7 +1,8 @@
 import { CellValue } from '../Board';
 import { PieceType } from '../enums/PieceType';
 import { Coord } from './boardUtils';
-import { PieceColor } from '../enums/PieceColor';
+import { checkPawnMove } from './PawnMove';
+import { diagonalMoveCheck, orthogonalMoveCheck } from './BoundCheck';
 
 export function isMovePossible(pieces: CellValue[][], from: Coord, to: Coord): boolean {
     const fromPiece = pieces[from.row][from.col];
@@ -17,15 +18,15 @@ export function isMovePossible(pieces: CellValue[][], from: Coord, to: Coord): b
 
     switch (fromPiece.pieceType) {
         case PieceType.bishop:
-            return true;
+            return checkBishopMove(pieces, from, to);
         case PieceType.pawn:
-            return checkPawnMove(toPiece, fromPiece, from, to);
+            return checkPawnMove(pieces, from, to);
         case PieceType.king:
-            return true;
+            return checkKingMove(from, to);
         case PieceType.knight:
             return checkKnightMove(from, to);
         case PieceType.queen:
-            return true;
+            return checkQueenMove(pieces, from, to);
         case PieceType.rok:
             return checkRokMove(pieces, from, to);
         default:
@@ -33,77 +34,28 @@ export function isMovePossible(pieces: CellValue[][], from: Coord, to: Coord): b
     }
 }
 
-function checkPawnMove(toPiece: CellValue, fromPiece: CellValue, from: Coord, to: Coord): boolean {
-    if (fromPiece.pieceColor === PieceColor.black && from.row === 6) {
-        return (to.row === from.row - 2 || to.row === from.row - 1) && to.col === from.col;
-    }
+function checkKingMove(from: Coord, to: Coord) {
+    const colDistance = Math.abs(to.col - from.col);
+    const rowDistance = Math.abs(to.row - from.row);
 
-    if (fromPiece.pieceColor === PieceColor.white && from.row === 1) {
-        return (to.row === from.row + 2 || to.row === from.row + 1) && to.col === from.col;
-    }
-
-    const moveDir: number = fromPiece.pieceColor === PieceColor.white ? 1 : -1;
-
-    debugger;
-    if (
-        to.row === from.row + moveDir &&
-        Math.abs(to.col - from.col) === 1 &&
-        toPiece.pieceColor !== PieceColor.none &&
-        toPiece.pieceColor !== fromPiece.pieceColor
-    ) {
-        return true;
-    }
-
-    return to.col === from.col && to.row === from.row + moveDir;
+    return !(colDistance > 1 || rowDistance > 1);
 }
 
 function checkKnightMove(from: Coord, to: Coord): boolean {
-    const colDiverstion = Math.abs(to.col - from.col);
-    const rowDiverstion = Math.abs(to.row - from.row);
+    const colDistance = Math.abs(to.col - from.col);
+    const rowDistance = Math.abs(to.row - from.row);
 
-    return (colDiverstion == 2 && rowDiverstion == 1) || (colDiverstion == 1 && rowDiverstion == 2);
-}
-
-function limit(value: number, start = 0, end = 7): number {
-    return Math.max(start, Math.min(value, end));
+    return (colDistance == 2 && rowDistance == 1) || (colDistance == 1 && rowDistance == 2);
 }
 
 function checkRokMove(pieces: CellValue[][], from: Coord, to: Coord): boolean {
-    const maxLength = pieces.length;
-    const leftBound = getBound(pieces, from.row, limit(from.col - 1), -1, 0, true);
-    const rightBound = getBound(pieces, from.row, limit(from.col + 1), 1, maxLength, true);
-    const topBound = getBound(pieces, from.col, limit(from.row - 1), -1, 0, false);
-    const bottomBound = getBound(pieces, from.col, limit(from.row + 1), 1, maxLength, false);
-
-    if (to.col !== from.col && to.row !== from.row) {
-        return false;
-    }
-
-    if (to.col < leftBound || to.col > rightBound || to.row > bottomBound || to.row < topBound) {
-        return false;
-    }
-
-    return true;
+    return orthogonalMoveCheck(pieces, from, to);
 }
 
-function getBound(
-    pieces: CellValue[][],
-    rowCol: number,
-    start: number,
-    direction: number,
-    end: number,
-    isXDirection: boolean,
-): number {
-    let i = start;
-    const none = PieceType.None;
+function checkBishopMove(pieces: CellValue[][], from: Coord, to: Coord): boolean {
+    return diagonalMoveCheck(to, from, pieces);
+}
 
-    while (i !== end) {
-        const pieceType = isXDirection ? pieces[rowCol][i].pieceType : pieces[i][rowCol].pieceType;
-        if (pieceType.valueOf() !== none.valueOf()) {
-            return i;
-        }
-        i += direction;
-    }
-
-    return end;
+function checkQueenMove(pieces: CellValue[][], from: Coord, to: Coord): boolean {
+    return diagonalMoveCheck(to, from, pieces) || orthogonalMoveCheck(pieces, from, to);
 }
