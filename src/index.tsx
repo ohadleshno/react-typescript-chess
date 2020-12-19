@@ -10,7 +10,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 ReactDOM.render(
     <React.StrictMode>
         <DndProvider backend={HTML5Backend}>
-            <Board name={'Chess game 2000'} size={'3em'} />
+            <Board name={'Chess game 2000'} size={'45px'} />
         </DndProvider>
     </React.StrictMode>,
     document.getElementById('root'),

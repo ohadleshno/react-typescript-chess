@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { CellValue } from './Board';
+import { CellValue, Move } from './Board';
 import Piece from './Piece';
 import { DragObjectWithType, useDrop } from 'react-dnd';
 import { Coord } from './chessUtils/boardUtils';
@@ -15,6 +15,7 @@ type Props = {
     rowNumber: number;
     columnNumber: number;
     move: (from: Coord, to: Coord) => void;
+    lastMove?: Move;
     isMovePossible: (from: Coord, to: Coord) => boolean;
     cell: CellValue;
     isWhiteTurn: boolean;
@@ -49,6 +50,10 @@ const Cell: React.FC<Props> = (props: Props) => {
             rowNumber={props.rowNumber}
             isOver={isOver}
             canDrop={canDrop}
+            isLastMove={
+                (props.rowNumber === props.lastMove?.from.row && props.columnNumber === props.lastMove?.from.col) ||
+                (props.rowNumber === props.lastMove?.to.row && props.columnNumber === props.lastMove?.to.col)
+            }
             columnNumber={props.columnNumber}
         >
             <Piece cord={cord} cell={props.cell} />
@@ -60,6 +65,7 @@ type WrapperProps = {
     columnNumber: number;
     rowNumber: number;
     isOver: boolean;
+    isLastMove: boolean;
     canDrop: boolean;
 };
 
@@ -67,20 +73,25 @@ const Wrapper = styled.div<WrapperProps>`
     background-color: ${(props) => getCellColor(props)};
     width: 2em;
     height: 2em;
-    margin: 1px;
+    margin: 0.01em;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
 `;
 
-function getCellColor({ columnNumber, rowNumber, isOver, canDrop }: WrapperProps): string {
+function getCellColor({ columnNumber, rowNumber, isOver, canDrop, isLastMove }: WrapperProps): string {
     if (isOver) {
         return canDrop ? 'green' : 'red';
     }
     if (canDrop) {
         return 'yellow';
     }
+
+    if (isLastMove) {
+        return 'orange';
+    }
+
     return (columnNumber + rowNumber) % 2 === 0 ? '#557ea4' : '#f1f1f1';
 }
 

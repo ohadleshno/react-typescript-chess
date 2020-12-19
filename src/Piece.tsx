@@ -25,7 +25,7 @@ const Piece: React.FC<Props> = (props: Props) => {
 
 const Icon = styled.i<{ color: PieceColor }>`
     color: ${(props) => props.color};
-    -webkit-text-stroke: 2px ${(props) => (props.color === PieceColor.white ? PieceColor.black : PieceColor.white)};
+    -webkit-text-stroke: 0.04em ${(props) => (props.color === PieceColor.white ? PieceColor.black : PieceColor.white)};
 
     &:before {
         margin: 0;

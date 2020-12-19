@@ -16,14 +16,22 @@ export interface CellValue {
     pieceType: PieceType;
 }
 
+export interface Move {
+    from: Coord;
+    to: Coord;
+    isCheck: boolean;
+}
+
 function move(
     pieces: CellValue[][],
     setBoard: React.Dispatch<React.SetStateAction<CellValue[][]>>,
     setIsWhiteTurn: React.Dispatch<React.SetStateAction<boolean>>,
+    setMoves: React.Dispatch<React.SetStateAction<Move[]>>,
 ) {
     return (from: Coord, to: Coord): void => {
         setBoard(movePiece(pieces, from, to));
         setIsWhiteTurn((whiteTurn) => !whiteTurn);
+        setMoves((moves) => [...moves, { from, to, isCheck: false }]);
     };
 }
 
@@ -36,6 +44,7 @@ function canMove(pieces: CellValue[][]) {
 const Board: React.FC<Props> = ({ name, size }: Props) => {
     const [pieces, setPieces] = useState<CellValue[][]>(INITIAL_BOARD);
     const [isWhiteTurn, setIsWhiteTurn] = useState(true);
+    const [moves, setMoves] = useState<Move[]>([]);
 
     return (
         <Wrapper>
@@ -49,7 +58,8 @@ const Board: React.FC<Props> = ({ name, size }: Props) => {
                             <Cell
                                 isWhiteTurn={isWhiteTurn}
                                 isMovePossible={canMove(pieces)}
-                                move={move(pieces, setPieces, setIsWhiteTurn)}
+                                lastMove={moves[moves.length - 1]}
+                                move={move(pieces, setPieces, setIsWhiteTurn, setMoves)}
                                 key={idx}
                                 rowNumber={id}
                                 columnNumber={idx}
