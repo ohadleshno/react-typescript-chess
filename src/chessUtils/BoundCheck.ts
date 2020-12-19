@@ -6,8 +6,8 @@ export function orthogonalMoveCheck(pieces: CellValue[][], from: Coord, to: Coor
     const maxLength = pieces.length;
     const leftBound = getOrthogonalMovementBound(pieces, from.row, limit(from.col - 1), -1, 0, true);
     const rightBound = getOrthogonalMovementBound(pieces, from.row, limit(from.col + 1), 1, maxLength, true);
-    const topBound = getOrthogonalMovementBound(pieces, from.col, limit(from.row - 1), -1, 0, false);
-    const bottomBound = getOrthogonalMovementBound(pieces, from.col, limit(from.row + 1), 1, maxLength, false);
+    const topBound = getOrthogonalMovementBound(pieces, limit(from.row - 1), from.col, -1, 0, false);
+    const bottomBound = getOrthogonalMovementBound(pieces, limit(from.row + 1), from.col, 1, maxLength, false);
 
     if (to.col !== from.col && to.row !== from.row) {
         return false;
@@ -54,17 +54,17 @@ export function diagonalMoveCheck(to: Coord, from: Coord, pieces: CellValue[][])
 
 function getOrthogonalMovementBound(
     pieces: CellValue[][],
-    rowCol: number,
-    start: number,
+    row: number,
+    col: number,
     direction: number,
     end: number,
     isXDirection: boolean,
 ): number {
-    let i = start;
+    let i = isXDirection ? col : row;
     const none = PieceType.None;
 
     while (i !== end) {
-        const pieceType = isXDirection ? pieces[rowCol][i].pieceType : pieces[i][rowCol].pieceType;
+        const pieceType = isXDirection ? pieces[row][i].pieceType : pieces[i][col].pieceType;
         if (pieceType.valueOf() !== none.valueOf()) {
             return i;
         }
