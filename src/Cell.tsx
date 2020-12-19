@@ -67,7 +67,7 @@ const Wrapper = styled.div<WrapperProps>`
     background-color: ${(props) => getCellColor(props)};
     width: 2em;
     height: 2em;
-    margin: 0;
+    margin: 1px;
     display: flex;
     justify-content: center;
     align-items: center;

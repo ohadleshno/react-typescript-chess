@@ -3,17 +3,16 @@ import { Coord } from './boardUtils';
 import { PieceType } from '../enums/PieceType';
 
 export function orthogonalMoveCheck(pieces: CellValue[][], from: Coord, to: Coord): boolean {
-    const maxLength = pieces.length;
-    const leftBound = getOrthogonalMovementBound(pieces, from.row, limit(from.col - 1), -1, 0, true);
-    const rightBound = getOrthogonalMovementBound(pieces, from.row, limit(from.col + 1), 1, maxLength, true);
-    const topBound = getOrthogonalMovementBound(pieces, limit(from.row - 1), from.col, -1, 0, false);
-    const bottomBound = getOrthogonalMovementBound(pieces, limit(from.row + 1), from.col, 1, maxLength, false);
+    const leftBound = findBound(pieces, from.row, limit(from.col - 1), -1, 0);
+    const rightBound = findBound(pieces, from.row, limit(from.col + 1), 1, 0);
+    const topBound = findBound(pieces, limit(from.row - 1), from.col, 0, -1);
+    const bottomBound = findBound(pieces, limit(from.row + 1), from.col, 0, 1);
 
     if (to.col !== from.col && to.row !== from.row) {
         return false;
     }
 
-    if (to.col < leftBound || to.col > rightBound || to.row > bottomBound || to.row < topBound) {
+    if (to.col < leftBound.col || to.col > rightBound.col || to.row > bottomBound.row || to.row < topBound.row) {
         return false;
     }
 
@@ -28,10 +27,10 @@ export function diagonalMoveCheck(to: Coord, from: Coord, pieces: CellValue[][])
         return false;
     }
 
-    const leftTopBound = getDiagonalBound(pieces, limit(from.row - 1), limit(from.col - 1), -1, -1);
-    const rightTopBound = getDiagonalBound(pieces, limit(from.row - 1), limit(from.col + 1), 1, -1);
-    const leftBottomBound = getDiagonalBound(pieces, limit(from.row + 1), limit(from.col - 1), -1, 1);
-    const rightBottomBound = getDiagonalBound(pieces, limit(from.row + 1), limit(from.col + 1), 1, 1);
+    const leftTopBound = findBound(pieces, limit(from.row - 1), limit(from.col - 1), -1, -1);
+    const rightTopBound = findBound(pieces, limit(from.row - 1), limit(from.col + 1), 1, -1);
+    const leftBottomBound = findBound(pieces, limit(from.row + 1), limit(from.col - 1), -1, 1);
+    const rightBottomBound = findBound(pieces, limit(from.row + 1), limit(from.col + 1), 1, 1);
 
     if (to.col < leftTopBound.col && to.row < leftTopBound.row) {
         return false;
@@ -52,35 +51,7 @@ export function diagonalMoveCheck(to: Coord, from: Coord, pieces: CellValue[][])
     return true;
 }
 
-function getOrthogonalMovementBound(
-    pieces: CellValue[][],
-    row: number,
-    col: number,
-    direction: number,
-    end: number,
-    isXDirection: boolean,
-): number {
-    let i = isXDirection ? col : row;
-    const none = PieceType.None;
-
-    while (i !== end) {
-        const pieceType = isXDirection ? pieces[row][i].pieceType : pieces[i][col].pieceType;
-        if (pieceType.valueOf() !== none.valueOf()) {
-            return i;
-        }
-        i += direction;
-    }
-
-    return end;
-}
-
-function getDiagonalBound(
-    pieces: CellValue[][],
-    row: number,
-    col: number,
-    directionX: number,
-    directionY: number,
-): Coord {
+function findBound(pieces: CellValue[][], row: number, col: number, directionX: number, directionY: number): Coord {
     let i = row;
     let j = col;
 
